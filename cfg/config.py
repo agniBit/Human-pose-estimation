@@ -3,27 +3,27 @@ from yacs.config import CfgNode as CN
 
 _c = CN()
 _c.plans = 3
-_c.img_h = 256
-_c.img_w = 256
+_c.img_h = 224
+_c.img_w = 224
 _c.out_features = 16
-_c.img_dir = "dataset/images_256/"
-_c.save_model_to = 'backup/last_checkpoints_v5_mse.pth'
-_c.load_model_from = 'backup/last_checkpoints_v5_mse.pth'
-_c.best_model_filename = 'backup/last_checkpoints_v5_mse.pth'
+_c.img_dir = '/content/images_v2'
+_c.save_model_to =      'backup/last_checkpoints_v6.pth'
+_c.load_model_from =    'backup/last_checkpoints_v6.pth'
+_c.best_model_filename ='backup/best_checkpoints_v6.pth'
 
 _c.TRAIN = CN()
 _c.TRAIN.OPTIMIZER = 'adam'
 _c.TRAIN.lr = 0.001
-_c.TRAIN.loss = 'AdaptiveWingLoss'
+_c.TRAIN.loss = 'MSE'
 _c.TRAIN.step_size = 12500
 _c.TRAIN.momentum = 0.9
 _c.TRAIN.batch_size = 24
 _c.TRAIN.SHUFFLE = True
-_c.TRAIN.raw_data_file = "dataset/joint_train_data.npy"
+_c.TRAIN.raw_data_file = "dataset/joint_train_data_v2.npy"
 
 _c.VALID = CN()
 _c.VALID.batch_size = 24
-_c.VALID.raw_data_file = "dataset/joint_val_data.npy"
+_c.VALID.raw_data_file = "dataset/joint_val_data_v2.npy"
 
 _c.dataset = CN()
 _c.dataset.mean = [0.485, 0.456, 0.406]

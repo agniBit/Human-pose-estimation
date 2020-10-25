@@ -5,7 +5,7 @@ import cfg.config as config
 import torch
 cfg = config.get_cfg_defaults()
 val_data_flow = dataset_loader.Data_flow(5,
-                                         cfg.VALID.raw_data_file,
+                                         cfg.TRAIN.raw_data_file,
                                          cfg.img_dir,
                                          [cfg.img_h, cfg.img_w],
                                          cfg.out_features,

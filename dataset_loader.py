@@ -23,7 +23,7 @@ class Data_augmentation():
         self.vertical_flip = vertical_flip
         self.ColorJitter = ColorJitter
 
-    def transform(self, image_path, targets):
+    def transform(self, image_path, targets=None):
         image = PIL.Image.open(image_path)
         # Resize
         if self.train:
@@ -77,7 +77,7 @@ class Data_flow(object):
         self.target_size = target_size
         self.num_outputs = num_outputs
         self.gaussian_kernel = None
-        self.size = 5
+        self.size = 3
         self.sigma = 2
         self.generate_gaussian_kernel()
         self.get_filenames_joints(raw_data_filename)
@@ -110,7 +110,7 @@ class Data_flow(object):
     def generate_target(self, points):
         target = torch.zeros((self.num_outputs, self.target_size[0], self.target_size[1]),
                              dtype=torch.float64)
-        tmp_size = (self.sigma * self.size + 1) // 2
+        tmp_size = (self.sigma * self.size +1) // 2
         for k in range(self.num_outputs):
             pt = [int(points[k][1]), int(points[k][0])]
             if not (0 <= pt[0] <= self.target_size[0] and 0 <= pt[1] <= self.target_size[1]):

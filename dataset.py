@@ -24,15 +24,15 @@ def get_json_data(isTrain=True):
 def read_saved_annot(isTrain):
     global start, joint_data
     if isTrain:
-        if os.path.exists("dataset/joint_train_data.npy"):
-            joint_data = np.load("dataset/joint_train_data.npy", allow_pickle=True).item()
+        if os.path.exists("dataset/joint_train_data_v2.npy"):
+            joint_data = np.load("dataset/joint_train_data_v2.npy", allow_pickle=True).item()
             start = joint_data["processing_till"]
         else:
             joint_data = {}
             print("joint_data.npy not found")
     else:
-        if os.path.exists("dataset/joint_val_data.npy"):
-            joint_data = np.load("dataset/joint_val_data.npy", allow_pickle=True).item()
+        if os.path.exists("dataset/joint_val_data_v2.npy"):
+            joint_data = np.load("dataset/joint_val_data_v2.npy", allow_pickle=True).item()
             start = joint_data["processing_till"]
         else:
             joint_data = {}
@@ -40,11 +40,11 @@ def read_saved_annot(isTrain):
 
 def save_joint_data(isTrain):
     if isTrain:
-        np.save("dataset/joint_train_data.npy", joint_data)
+        np.save("dataset/joint_train_data_v2.npy", joint_data)
     else:
-        np.save("dataset/joint_val_data.npy", joint_data)
+        np.save("dataset/joint_val_data_v2.npy", joint_data)
 
-def transform(img, target_size, points=None, name='test.jpg', num=-1, save_img=True):
+def transform(img, target_size, points=None, viz = [], name='test.jpg', num=-1, save_img=True, save_file_name=''):
     global joint_data
     if img is None or img.shape[0] <= 0 or img.shape[1] <= 0:
         print('assertion error if img is None or img.shape[0] <= 0 or img.shape[1] <= 0')
@@ -63,12 +63,19 @@ def transform(img, target_size, points=None, name='test.jpg', num=-1, save_img=T
         file_name = name
     else:
         file_name = "{}_{}.jpg".format(name.split(".")[0], num)
+    for i in range(len(viz)):
+        if int(viz[i])==0:
+            points[i][0] = 0
+            points[i][1] = 0
     if save_img:
-        if cv2.imwrite("dataset/images_256/"+file_name,new_img):
-          print("file saved   "+"dataset/images_256/"+file_name)
+        if save_file_name=='':
+          save_file_name = "/content/images_v2/"+file_name
+        if cv2.imwrite(save_file_name,new_img):
+          print("file saved   "+save_file_name)
           joint_data[file_name] = points
         else:
-          print("failede to save file "+"dataset/images_256/"+file_name)
+          print("failede to save file "+ save_file_name)
+    return new_img
 
 def crop_img(img, j, joints_vis, name="test.jpg", num=0):
     j = np.array(j)
@@ -90,8 +97,8 @@ def crop_img(img, j, joints_vis, name="test.jpg", num=0):
             j[i][1] -= ul[1]
         else:
             j[i][0] = -1
-            j[i][0] = -1
-    transform(new_img, [256, 256], points=j, name=name, num=num)
+            j[i][1] = -1
+    transform(new_img, [224, 224], points=j, viz = joints_vis, name=name, num=num)
 
 def create_dataset(isTrain=True):
     global start, j_data
@@ -99,25 +106,19 @@ def create_dataset(isTrain=True):
     read_saved_annot(isTrain)
     for k in range(start,len(j_data)):
         data = j_data[k]
-        if os.path.exists("dataset/images/" + data['image']):
-            img = cv2.imread("dataset/images/" + data['image'])
+        if os.path.exists('/content/images/' + data['image']):
+            img = cv2.imread('/content/images/' + data['image'])
         else:
-            print(str(k) + "    img_not found  ", "dataset/images/" + data['image'])
+            print(str(k) + "    img_not found  ", '/content/images/' + data['image'])
             joint_data["processing_till"] = k
-            if k % 50 == 0 and k != 0:
-                save_joint_data(isTrain)
-                with open("log/process.txt", "w+") as f:
-                    f.write("image processed " + str(k) + "\n")
             continue
         crop_img(img.copy(), data["joints"], data["joints_vis"], data["image"],num=k)
         joint_data["processing_till"] = k
         # os.remove("dataset/images/" + data['img_paths'])
-        if k % 50 == 0 and k != 0:
-            save_joint_data(isTrain)
-            with open("process.txt","w+") as fi:
-                fi.write("image processed " + str(k) + "\n")
+    save_joint_data(isTrain)
 
-if __name__ == '__main__':
-    create_dataset(isTrain=True)
-    print("\n\n\n\n\n\n\n\n\n\n\n\n=========================")
-    create_dataset(isTrain=False)
+# if __name__ == '__main__':
+#     create_dataset(isTrain=True)
+#     print('\n\n\n\n\n\n\n\ntrain done')
+#     start = 0
+#     create_dataset(isTrain=False)

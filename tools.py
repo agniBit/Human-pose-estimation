@@ -34,13 +34,13 @@ def cal_acc(targets, output):
     return avg
 
 
-def get_preds(scores,img_h=256,img_w=256):
+def get_preds(scores,img_h=224,img_w=224):
     # scores = torch.Tensor.cpu(scores).detach().numpy()
     scores = np.reshape(scores, (scores.shape[0], scores.shape[1], -1))
     max_val, indx = np.max(scores, -1), np.argmax(scores, -1)
     preds = np.zeros((scores.shape[0], scores.shape[1], 2), int)
-    preds[:, :, 0] = indx[:, :] // img_h
-    preds[:, :, 1] = indx[:, :] % img_w
+    preds[:, :, 0] = indx[:, :] % img_h
+    preds[:, :, 1] = indx[:, :] // img_w
     return preds
 
 
