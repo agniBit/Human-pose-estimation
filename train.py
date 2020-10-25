@@ -28,10 +28,11 @@ def train(isLoad=True, e_epoch=200):
                                              [cfg.img_h, cfg.img_w],
                                              cfg.out_features,
                                              train=False)
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    log.write("device " + str(device))
     model = levelnet.Model().to(device)
+    # checkpoint = torch.load('backup/last_checkpoints_v5_mse.pth')
+    # model.load_state_dict(checkpoint['state_dict'])
+    log.write("device " + str(device))
     if cfg['TRAIN'].OPTIMIZER == 'adam':
         log.write("adam")
         print('adam')
@@ -56,7 +57,7 @@ def train(isLoad=True, e_epoch=200):
         print('adaptive')
         criterion = AdaptiveWingLoss()
     else:
-        assert "Not a Valid loss"
+        assert False,"Not a Valid loss"
     log.write('lr :' + str(cfg['TRAIN'].lr))
     summary(model, (3, 256, 256))
     model_filename = cfg.load_model_from
@@ -101,12 +102,10 @@ def train(isLoad=True, e_epoch=200):
             log.write(str(i) + " loss :" + str(l) + " accuracy : " +
                       str(train_acc / targets.shape[0]))
             avg_train_loss += l
-
-            if i % 20 == 0:
+            if i % 50 == 0:
                 log.save()
                 if i == 0:
                     get_gpu_memory()
-
         ### val batches
         with torch.no_grad():
             for i in range(0, math.floor(val_data_flow.data_len / cfg.VALID.batch_size)):
@@ -157,7 +156,12 @@ def train(isLoad=True, e_epoch=200):
                     )
         print(results)
         with open("log/train_log.txt", 'a+') as f:
-            f.write(results + '\n')
+              f.write("load model : " + cfg.load_model_from +
+                  "  save to : "+ cfg.save_model_to +
+                  "  optim : " + cfg.TRAIN.OPTIMIZER +
+                  "  loss fun : " + cfg.TRAIN.loss +
+                  "  lr : " + str(cfg.TRAIN.lr) + " --  " +
+                  results + '\n')
 
         log.write(results)
         log.save()
@@ -166,6 +170,6 @@ def train(isLoad=True, e_epoch=200):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-nLoad', action='store_false', default=True,
-                        dest='Load', help='load saved model')
+                        dest='Load', help="don't resume training")
     args = vars(parser.parse_args())
     train(args['Load'])

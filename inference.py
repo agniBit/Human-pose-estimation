@@ -13,11 +13,11 @@ import dataset_loader
 import cfg.config as config
 import torch
 
-def infer(img_path,save_output):
+def infer(img_path,save_output,model_weights):
     cfg = config.get_cfg_defaults()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = levelnet.Model()
-    model.load_state_dict(torch.load('backup/best_checkpoints_v5_mse.pth')["state_dict"])
+    model.load_state_dict(torch.load(model_weights)["state_dict"])
     model.to(device)
     model.eval()
     img = cv2.imread(img_path)
@@ -39,6 +39,7 @@ def infer(img_path,save_output):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Human pose estimation")
     parser.add_argument("--input", type=str, default='', help="video source")
-    parser.add_argument("--save", type=str, default='', help="save output")
+    parser.add_argument("--save", type=str, default='', help="save output image")
+    parser.add_argument("--weights", type=str, default='model_weights.pth', help="weight file")
     args = parser.parse_args()
-    infer(args.input,args.save)
+    infer(args.input,args.save,args.weights)
